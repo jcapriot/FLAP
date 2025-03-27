@@ -1,4 +1,0 @@
-[submodule "src/third_party/fortran_tester"]
-  path = src/third_party/fortran_tester
-  url = https://github.com/pdebuyl/fortran_tester
-  branch = master
