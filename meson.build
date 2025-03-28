@@ -80,4 +80,6 @@ penf_dep = penf_proj.get_variable('penf_dep')
 
 subdir('src/lib')
 
-subdir('src/tests')
+if get_option('build_examples')
+    subdir('src/tests')
+endif
