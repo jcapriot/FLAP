@@ -311,7 +311,7 @@ contains
             if (markdownd) then
               usage = new_line('a')//'* `'//trim(adjustl(self%switch))//' '//name_//'`, `'//trim(adjustl(self%switch_ab))//' '//name_//''//'`  '
             else
-              usage = '   '//switch_//' '//name_//', '//switch_ab_//' '//name_//''
+              usage = '   '//switch_//', '//switch_ab_//' '//name_//''
             endif
           else
             if (markdownd) then
@@ -358,8 +358,8 @@ contains
       if (markdownd) then
         usage = usage//'  '
       endif
-      usage = usage//new_line('a')//prefd//repeat(' ',4)//trim(str(self%position, .true.))//&
-       '-th argument'
+!      usage = usage//new_line('a')//prefd//repeat(' ',4)//trim(str(self%position, .true.))//&
+!       '-th argument'
     endif
     if (allocated(self%envvar)) then
       if (self%envvar /= '') then
