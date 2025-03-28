@@ -26,6 +26,7 @@ type, extends(object) :: command_line_argument
   !<
   !< @note If not otherwise declared the action on CLA value is set to "store" a value.
   private
+  character(len=:), allocatable, public :: name                   !< Name of the argument.
   character(len=:), allocatable, public :: switch                 !< Switch name.
   character(len=:), allocatable, public :: switch_ab              !< Abbreviated switch name.
   character(len=:), allocatable, public :: act                    !< CLA value action.
@@ -265,6 +266,7 @@ contains
   logical,      optional,       intent(in) :: markdown   !< Format for markdown
   character(len=:), allocatable            :: usage      !< Usage string.
   character(len=:), allocatable            :: prefd      !< Prefixing string.
+  character(len=:), allocatable            :: name_      !< Variable name, local variable
   character(len=:), allocatable            :: switch_    !< Switch name, local variable.
   character(len=:), allocatable            :: switch_ab_ !< Abbreviated switch name, local variable.
   integer(I4P)                             :: a          !< Counter.
@@ -273,6 +275,7 @@ contains
 
   markdownd = .false. ; if (present(markdown)) markdownd = markdown
   indent = 4
+  name_ = colorize(trim(adjustl(self%name)), color_fg=self%help_color, style=self%help_style)
   switch_ = colorize(trim(adjustl(self%switch)), color_fg=self%help_color, style=self%help_style)
   switch_ab_ = colorize(trim(adjustl(self%switch_ab)), color_fg=self%help_color, style=self%help_style)
   if (.not.self%is_hidden) then
@@ -282,12 +285,12 @@ contains
           usage = ''
           select case(self%nargs)
           case('+')
-            usage = usage//' value#1 [value#2...]'
+            usage = usage//' '//name_//'#1 ['//name_//'#2...]'
           case('*')
-            usage = usage//' [value#1 value#2...]'
+            usage = usage//' ['//name_//'#1 '//name_//'#2...]'
           case default
             do a=1, cton(str=trim(adjustl(self%nargs)),knd=1_I4P)
-              usage = usage//' value#'//trim(str(a, .true.))
+              usage = usage//' '//name_//'#'//trim(str(a, .true.))
             enddo
           endselect
           if (trim(adjustl(self%switch))/=trim(adjustl(self%switch_ab))) then
@@ -306,32 +309,32 @@ contains
         else
           if (trim(adjustl(self%switch))/=trim(adjustl(self%switch_ab))) then
             if (markdownd) then
-              usage = new_line('a')//'* `'//trim(adjustl(self%switch))//' value`, `'//trim(adjustl(self%switch_ab))//' value'//'`  '
+              usage = new_line('a')//'* `'//trim(adjustl(self%switch))//' '//name_//'`, `'//trim(adjustl(self%switch_ab))//' '//name_//''//'`  '
             else
-              usage = '   '//switch_//' value, '//switch_ab_//' value'
+              usage = '   '//switch_//' '//name_//', '//switch_ab_//' '//name_//''
             endif
           else
             if (markdownd) then
-              usage = new_line('a')//'* `'//trim(adjustl(self%switch))//' value`  '
+              usage = new_line('a')//'* `'//trim(adjustl(self%switch))//' '//name_//'`  '
             else
-              usage = '   '//switch_//' value'
+              usage = '   '//switch_//' '//name_//''
             endif
           endif
         endif
       else
         if (markdownd) then
-          usage = new_line('a')//'* value'
+          usage = new_line('a')//'* '//name_//''
         else
-          usage = '  value'
+          usage = '  '//name_//''
         endif
       endif
       if (allocated(self%choices)) then
-        usage = usage//', value in: `'//self%choices//'`'
+        usage = usage//', '//name_//' in: `'//self%choices//'`'
       endif
     elseif (self%act==action_store_star) then
-      usage = '  [value]'
+      usage = '  ['//name_//']'
       if (allocated(self%choices)) then
-        usage = usage//', value in: ('//self%choices//')'
+        usage = usage//', '//name_//' in: ('//self%choices//')'
       endif
     else
       if (trim(adjustl(self%switch))/=trim(adjustl(self%switch_ab))) then
@@ -395,11 +398,13 @@ contains
   logical                                  :: plain_           !< Return the signature as plain switches list, local var.
   logical                                  :: bash_completion_ !< Return the signature for bash completion, local variable.
   character(len=:), allocatable            :: signature        !< Signature.
+  character(len=:), allocatable            :: name_            !< Variable name, local variable
   integer(I4P)                             :: nargs            !< Number of arguments consumed by CLA.
   integer(I4P)                             :: a                !< Counter.
 
   bash_completion_ = .false. ; if (present(bash_completion)) bash_completion_ = bash_completion
   plain_ = .false. ; if (present(plain)) plain_ = plain
+  name_ = colorize(trim(adjustl(self%name)), color_fg=self%help_color, style=self%help_style)
   if (.not.self%is_hidden) then
     if (bash_completion_) then
       if (.not.self%is_positional) then
@@ -439,18 +444,18 @@ contains
           if (allocated(self%nargs)) then
             select case(self%nargs)
             case('+')
-              signature = 'value#1 [value#2 value#3...]'
+              signature = ''//name_//'#1 ['//name_//'#2 '//name_//'#3...]'
             case('*')
-              signature = '[value#1 value#2 value#3...]'
+              signature = '['//name_//'#1 '//name_//'#2 '//name_//'#3...]'
             case default
               nargs = cton(str=trim(adjustl(self%nargs)),knd=1_I4P)
               signature = ''
               do a=1, nargs
-                signature = signature//'value#'//trim(str(a, .true.))//' '
+                signature = signature//''//name_//'#'//trim(str(a, .true.))//' '
               enddo
             endselect
           else
-            signature = 'value'
+            signature = ''//name_//''
           endif
           if (.not.self%is_val_required) signature = '['//signature//']'
           if (self%is_required) then
@@ -460,13 +465,13 @@ contains
           endif
         else
           if (self%is_required) then
-            signature = ' value'
+            signature = ' '//name_//''
           else
-            signature = ' [value]'
+            signature = ' ['//name_//']'
           endif
         endif
       elseif (self%act==action_store_star) then
-        signature = ' [value]'
+        signature = ' ['//name_//']'
       else
         if (self%is_required) then
           signature = ' '//trim(adjustl(self%switch))

@@ -227,7 +227,7 @@ contains
   endif
   endsubroutine set_mutually_exclusive_groups
 
-  subroutine add(self, pref, group, group_index, switch, switch_ab, help, help_markdown, help_color, help_style, &
+  subroutine add(self, pref, group, group_index, name, switch, switch_ab, help, help_markdown, help_color, help_style, &
                  required, val_required, positional, position, hidden, act, def, nargs, choices, exclude, envvar, error)
   !< Add CLA to CLI.
   !<
@@ -241,6 +241,7 @@ contains
   character(*), optional,        intent(in)    :: pref          !< Prefixing string.
   character(*), optional,        intent(in)    :: group         !< Name of the grouped CLAs.
   integer(I4P), optional,        intent(in)    :: group_index   !< Index of the grouped CLAs.
+  character(*), optional,        intent(in)    :: name          !< Argument name.
   character(*), optional,        intent(in)    :: switch        !< Switch name.
   character(*), optional,        intent(in)    :: switch_ab     !< Abbreviated switch name.
   character(*), optional,        intent(in)    :: help          !< Help message describing the CLA.
@@ -273,6 +274,8 @@ contains
       cla%switch_ab = switch_ab
     endif
   endif
+
+  cla%name            = 'value'                 ; if (present(name         )) cla%name            = name
                                                   if (present(switch_ab    )) cla%switch_ab       = switch_ab
   cla%help            = 'Undocumented argument' ; if (present(help         )) cla%help            = help
   cla%help_color      = ''                      ; if (present(help_color   )) cla%help_color      = help_color

@@ -57,6 +57,7 @@ end program ucs4_support
 '''
 ucs4_supported = fc.run(ucs4_code, name: 'ucs4 support')
 if ucs4_supported.returncode() == 0
+
     add_project_arguments('-D_UCS4_SUPPORTED', language : 'fortran')
 endif
 
